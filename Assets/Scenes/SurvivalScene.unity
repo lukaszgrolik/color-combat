@@ -457,7 +457,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &853802403
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -953,7 +953,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1808076044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1132,19 +1132,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Agent
       objectReference: {fileID: 0}
+    - target: {fileID: 6887981464714494618, guid: 3a643f478c34ea14a98c23c6c9ebfd5e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3a643f478c34ea14a98c23c6c9ebfd5e, type: 3}
---- !u!114 &6012366395405392811 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2228507472536041005, guid: 3a643f478c34ea14a98c23c6c9ebfd5e, type: 3}
-  m_PrefabInstance: {fileID: 6012366395405392810}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e81d0a940d4a4c945a15c3605ca8754c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &7195032381962485129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1152,6 +1145,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7195032382096628534, guid: bcc0a41c3e0872449b022eb8be10fe5d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7195032383165689356, guid: bcc0a41c3e0872449b022eb8be10fe5d, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -1207,7 +1204,7 @@ PrefabInstance:
     - target: {fileID: 7195032383165689359, guid: bcc0a41c3e0872449b022eb8be10fe5d, type: 3}
       propertyPath: controlledAgent
       value: 
-      objectReference: {fileID: 6012366395405392811}
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7195032383165689344, guid: bcc0a41c3e0872449b022eb8be10fe5d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: bcc0a41c3e0872449b022eb8be10fe5d, type: 3}
