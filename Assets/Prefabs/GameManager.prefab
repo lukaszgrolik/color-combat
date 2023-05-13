@@ -701,7 +701,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7195032382096628552
 Transform:
   m_ObjectHideFlags: 0
@@ -1229,10 +1229,12 @@ MonoBehaviour:
   agentLayerMask:
     serializedVersion: 2
     m_Bits: 128
+  agentsDetectionAreaMask:
+    serializedVersion: 2
+    m_Bits: 1024
   agentPrefab: {fileID: 6887981464714494618, guid: 3a643f478c34ea14a98c23c6c9ebfd5e, type: 3}
   movementTargetPrefab: {fileID: 2758542078050988410, guid: 3e08e64096c234448b902ba742aadb46, type: 3}
   projectilePrefab: {fileID: 5544697205969096548, guid: 4580fb7ed29eb554aa35cf8959136157, type: 3}
-  controlledAgent: {fileID: 0}
   _eh_gameMode: 0
   gameUI: {fileID: 7195032383214367437}
 --- !u!114 &7195032383165689347
