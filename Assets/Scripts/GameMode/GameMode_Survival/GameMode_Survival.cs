@@ -17,7 +17,8 @@ namespace GameMode
             IGameLayerMasksProvider gameLayerMasksProvider,
             IAgentTypesProvider agentTypesProvider,
             IAgentPartiesProvider agentPartiesProvider,
-            IRegistryAgents registry
+            IRegistryAgents registry,
+            GameDataDef.Dataset dataset
         )
         {
             this.registry = registry;
@@ -25,7 +26,8 @@ namespace GameMode
             var agent = CreatePlayerAgent(
                 agentTypesProvider,
                 agentPartiesProvider,
-                registry
+                registry,
+                dataset
             );
 
             SetControlledAgent(agent);
@@ -38,7 +40,8 @@ namespace GameMode
             enemySpawner.Setup(
                 registry: registry,
                 agentTypesProvider: agentTypesProvider,
-                agentPartiesProvider: agentPartiesProvider
+                agentPartiesProvider: agentPartiesProvider,
+                dataset: dataset
             );
             enemySpawner.agentSpawned += OnAgentSpawned;
 
@@ -56,33 +59,6 @@ namespace GameMode
             );
 
             agentsDetectionArea.agentEntered += OnAgentEntered;
-        }
-
-        Agent CreatePlayerAgent(
-            IAgentTypesProvider agentTypesProvider,
-            IAgentPartiesProvider agentPartiesProvider,
-            IRegistryAgents registry
-        )
-        {
-            var agentType = agentTypesProvider.AgentTypes[AgentTypeName.Neutral];
-            var baseHealth = 100f;
-            var agentConfig = new AgentConfig(
-                agentType: agentType,
-                size: 1,
-                healthPoints: baseHealth,
-                movementSpeed: 5f
-            );
-
-            // var agent = prefabsProvider.AgentPrefab;
-            var agent = registry.InstantiateAgent(
-                pos: Vector3.zero,
-                rot: Quaternion.identity,
-                agentConfig: agentConfig,
-                agentControl: new AgentControl_Player(),
-                agentParty: agentPartiesProvider.PlayerParty
-            );
-
-            return agent;
         }
 
         public override void OnUpdate()

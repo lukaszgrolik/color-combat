@@ -4,6 +4,12 @@ using UnityEngine;
 
 using GameCore;
 
+// LukUtils
+// Game.Core
+// Game.Mode
+// Game.Main
+// Game.UI
+
 namespace GameMain
 {
     // public interface IGameManagerAgents
@@ -65,11 +71,15 @@ namespace GameMain
             cameraFollow = GetComponent<CameraFollow>();
             playerController = GetComponent<PlayerController>();
 
+            var dataset = new GameDataInst.Inst1.Dataset().main;
+            dataset.LoadResources();
+
             gameCore = new GameCore.GameCore();
             gameModeManager = new GameMode.GameModeManager(
                 gameCore: gameCore,
                 registry: this,
-                gameLayerMasksProvider: this
+                gameLayerMasksProvider: this,
+                dataset: dataset
             );
 
             consolePrompt = new ConsolePrompt();
@@ -131,11 +141,14 @@ namespace GameMain
             // cameraSwitch.Activate(CameraMode.Perspective);
 
 
-            // if (_eh_gameMode == _EH_GameMode.Adventure) this.gameMode = new GameMode_Adventure<GameManager>(this);
-            // if (_eh_gameMode == _EH_GameMode.Survival) this.gameMode = new GameMode_Survival<GameManager>(this, controlledAgent);
+            GameMode.GameMode gameMode = null;
+            if (_eh_gameMode == _EH_GameMode.None) gameMode = new GameMode.GameMode_None();
+            // if (_eh_gameMode == _EH_GameMode.Adventure) gameMode = new GameMode_Adventure<GameManager>();
+            if (_eh_gameMode == _EH_GameMode.Survival) gameMode = new GameMode.GameMode_Survival();
 
             // gameModeManager.ActivateGameMode(new GameMode.GameMode_None());
-            gameModeManager.ActivateGameMode(new GameMode.GameMode_Survival());
+            // gameModeManager.ActivateGameMode(new GameMode.GameMode_Survival());
+            gameModeManager.ActivateGameMode(gameMode);
             // gameModeManager.OnStart();
         }
 
@@ -155,13 +168,17 @@ namespace GameMain
             Vector3 pos,
             Quaternion rot,
             AgentConfig agentConfig,
+            GameDataDef.Agent agentData,
             AgentControl agentControl,
             AgentParty agentParty
         ) {
             var agentObj = Instantiate(agentPrefab, pos, rot);
+            Instantiate(agentData.prefab.value, agentObj.transform);
+
             var agent = agentObj.AddComponent<Agent>();
             agent.Setup(
                 agentConfig: agentConfig,
+                agentData: agentData,
                 // agentParty: gameCore.EnemyParty,
                 agentParty: agentParty,
                 // agentControl: new AgentControl_WarriorAI(),

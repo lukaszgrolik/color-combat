@@ -29,6 +29,7 @@ namespace GameCore
 
         public void Setup(
             AgentConfig agentConfig,
+            GameDataDef.Agent agentData,
             AgentParty agentParty,
             AgentControl agentControl,
             Dictionary<AgentType, float> resistances,
@@ -74,10 +75,11 @@ namespace GameCore
 
             // var spriteRend = GetComponentInChildren<SpriteRenderer>();
             // spriteRend.color = agentConfig.agentType.color;
-            var meshRend = GetComponentInChildren<MeshRenderer>();
-            var matProps = new MaterialPropertyBlock();
-            matProps.SetColor("_BaseColor", agentConfig.agentType.color);
-            meshRend.SetPropertyBlock(matProps);
+
+            // var meshRend = GetComponentInChildren<MeshRenderer>();
+            // var matProps = new MaterialPropertyBlock();
+            // matProps.SetColor("_BaseColor", agentConfig.agentType.color);
+            // meshRend.SetPropertyBlock(matProps);
 
             gameObject.transform.localScale = Vector3.one * agentConfig.size;
 

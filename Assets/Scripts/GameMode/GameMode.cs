@@ -28,12 +28,43 @@ namespace GameMode
             IGameLayerMasksProvider gameLayerMasksProvider,
             IAgentTypesProvider agentTypesProvider,
             IAgentPartiesProvider agentPartiesProvider,
-            IRegistryAgents registry
+            IRegistryAgents registry,
+            GameDataDef.Dataset dataset
         );
 
         public virtual void OnUpdate()
         {
 
+        }
+
+        protected Agent CreatePlayerAgent(
+            IAgentTypesProvider agentTypesProvider,
+            IAgentPartiesProvider agentPartiesProvider,
+            IRegistryAgents registry,
+            GameDataDef.Dataset dataset
+        )
+        {
+            var agentType = agentTypesProvider.AgentTypes[AgentTypeName.Neutral];
+            var baseHealth = 100f;
+            var agentConfig = new AgentConfig(
+                agentType: agentType,
+                size: 1,
+                healthPoints: baseHealth,
+                movementSpeed: 5f
+            );
+            var agentData = dataset.playerAgents["default"];
+
+            // var agent = prefabsProvider.AgentPrefab;
+            var agent = registry.InstantiateAgent(
+                pos: Vector3.zero,
+                rot: Quaternion.identity,
+                agentConfig: agentConfig,
+                agentData: agentData,
+                agentControl: new AgentControl_Player(),
+                agentParty: agentPartiesProvider.PlayerParty
+            );
+
+            return agent;
         }
     }
 }

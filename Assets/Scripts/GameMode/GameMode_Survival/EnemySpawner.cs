@@ -19,6 +19,7 @@ namespace GameMode
         private IRegistryAgents registry;
         private IAgentTypesProvider agentTypesProvider;
         private IAgentPartiesProvider agentPartiesProvider;
+        private GameDataDef.Dataset dataset;
 
         private List<int> enemiesAmountDist = new List<int>(){1, 1, 1, 1, 1, 2, 2, 2, 3, 3};
 
@@ -39,12 +40,14 @@ namespace GameMode
         public void Setup(
             IRegistryAgents registry,
             IAgentTypesProvider agentTypesProvider,
-            IAgentPartiesProvider agentPartiesProvider
+            IAgentPartiesProvider agentPartiesProvider,
+            GameDataDef.Dataset dataset
         )
         {
             this.registry = registry;
             this.agentTypesProvider = agentTypesProvider;
             this.agentPartiesProvider = agentPartiesProvider;
+            this.dataset = dataset;
         }
 
         public void OnUpdate() {
@@ -68,14 +71,15 @@ namespace GameMode
                 healthPoints: baseHealth * size * Random.Range(1f, 2f),
                 movementSpeed: Random.Range(1f, 2f)
             );
+            var agentData = dataset.agents.Sample();
 
             for (int i = 0; i < amount; i++)
             {
-                SpawnEnemy(pos, agentConfig);
+                SpawnEnemy(pos, agentConfig, agentData);
             }
         }
 
-        void SpawnEnemy(Vector3 groupPos, AgentConfig agentConfig) {
+        void SpawnEnemy(Vector3 groupPos, AgentConfig agentConfig, GameDataDef.Agent agentData) {
             spawnLastTime = Time.time;
 
             var circlePos2d = Random.insideUnitCircle.normalized * groupMemberSpawnRadius;
@@ -84,6 +88,7 @@ namespace GameMode
                 pos,
                 Quaternion.identity,
                 agentConfig,
+                agentData,
                 agentControl: new AgentControl_WarriorAI(),
                 agentParty: agentPartiesProvider.EnemyParty
             );

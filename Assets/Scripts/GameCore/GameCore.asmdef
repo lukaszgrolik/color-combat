@@ -2,7 +2,8 @@
     "name": "GameCore",
     "rootNamespace": "",
     "references": [
-        "GUID:eb6f006375fadd94b8491a0835356621"
+        "GUID:eb6f006375fadd94b8491a0835356621",
+        "GUID:111c8b56af6963042a5482086ca129a4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

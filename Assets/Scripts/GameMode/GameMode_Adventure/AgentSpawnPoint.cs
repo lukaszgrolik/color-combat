@@ -12,9 +12,10 @@ namespace GameMode
 {
     public class AgentSpawnPoint : MonoBehaviour
     {
-        private IRegistry registry;
+        private IRegistryAgents registry;
         private IAgentTypesProvider agentTypesProvider;
         private IAgentPartiesProvider agentPartiesProvider;
+        private GameDataDef.Dataset dataset;
 
         [SerializeField] private string agentTypeCode;
         [SerializeField] private int amount = 1;
@@ -44,14 +45,16 @@ namespace GameMode
         private AgentType agentType;
 
         public void Setup(
-            IRegistry registry,
+            IRegistryAgents registry,
             IAgentTypesProvider agentTypesProvider,
-            IAgentPartiesProvider agentPartiesProvider
+            IAgentPartiesProvider agentPartiesProvider,
+            GameDataDef.Dataset dataset
         )
         {
             this.registry = registry;
             this.agentTypesProvider = agentTypesProvider;
             this.agentPartiesProvider = agentPartiesProvider;
+            this.dataset = dataset;
         }
 
         public void Spawn()
@@ -74,14 +77,15 @@ namespace GameMode
                 healthPoints: baseHealth * size * Random.Range(1f, 2f),
                 movementSpeed: Random.Range(2f, 4f)
             );
+            var agentData = dataset.agents.Sample();
 
             for (int i = 0; i < amount; i++)
             {
-                SpawnAgent(pos, agentConfig);
+                SpawnAgent(pos, agentConfig, agentData);
             }
         }
 
-        void SpawnAgent(Vector3 groupPos, AgentConfig agentConfig)
+        void SpawnAgent(Vector3 groupPos, AgentConfig agentConfig, GameDataDef.Agent agentData)
         {
             var circlePos2d = Random.insideUnitCircle.normalized * spawnRadius;
             var pos = groupPos + new Vector3(circlePos2d.x, 0, circlePos2d.y);
@@ -89,6 +93,7 @@ namespace GameMode
                 pos,
                 Quaternion.identity,
                 agentConfig,
+                agentData,
                 agentControl: new AgentControl_WarriorAI(),
                 agentParty: agentPartiesProvider.EnemyParty
             );

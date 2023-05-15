@@ -79,6 +79,7 @@ namespace GameCore
             Vector3 pos,
             Quaternion rot,
             AgentConfig agentConfig,
+            GameDataDef.Agent agentData,
             AgentControl agentControl,
             AgentParty agentParty
         );
@@ -100,7 +101,7 @@ namespace GameCore
 
     public interface IPrefabsProvider
     {
-        GameObject AgentPrefab { get; }
+        // GameObject AgentPrefab { get; }
         GameObject MovementTargetPrefab { get; }
         GameObject ProjectilePrefab { get; }
     }
