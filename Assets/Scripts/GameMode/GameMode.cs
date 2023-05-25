@@ -50,7 +50,8 @@ namespace GameMode
                 agentType: agentType,
                 size: 1,
                 healthPoints: baseHealth,
-                movementSpeed: 5f
+                movementSpeed: 5f,
+                agentDetectionRadius: 20f
             );
             var agentData = dataset.playerAgents["default"];
 

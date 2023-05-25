@@ -76,7 +76,7 @@ namespace GameCore
         private Vector3? attackTargetPos = null;
         private float attackLastTime = -1f;
 
-        public void Setup(
+        public AgentCombat(
             IPrefabsProvider prefabsProvider,
             IAgentTypesProvider agentTypesProvider,
             IRegistry registry,
@@ -192,6 +192,8 @@ namespace GameCore
             // var dir = (targetPos - originPos).normalized;
             // var angle = Vector3.Angle(dir, origin.forward);
             var angle = 90 - Mathf.Atan2(targetPos.z - originPos.z, targetPos.x - originPos.x) * Mathf.Rad2Deg;
+
+            agentMB.transform.rotation = Quaternion.Euler(0, angle, 0);
 
             currentProjectileSpawn.Spawn(angle);
         }

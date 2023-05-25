@@ -43,7 +43,7 @@ namespace GameCore
             var rot = Quaternion.Euler(0f, angle, 0f);
 
             // var projObj = Instantiate(projectilePrefab.ProjectilePrefab, projectileSpawnPoint.position, transform.rotation);
-            var projObj = GameObject.Instantiate(prefabsProvider.ProjectilePrefab, agentMB.transform.position + new Vector3(0, .25f, 0), rot);
+            var projObj = GameObject.Instantiate(prefabsProvider.ProjectilePrefab, agentMB.transform.position + new Vector3(0, 1f, 0), rot);
             projObj.transform.localScale = Vector3.one * .5f;
             var proj = projObj.AddComponent<Projectile>();
 
@@ -62,7 +62,7 @@ namespace GameCore
                 layerMasksProvider: layerMasksProvider,
                 // color: colors[Random.Range(0, colors.Count)],
                 color: damageMode.color,
-                speed: 15
+                speed: 25
             );
 
             // registry.RegisterProjectile(proj);

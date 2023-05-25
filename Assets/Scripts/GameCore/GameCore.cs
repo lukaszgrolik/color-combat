@@ -4,24 +4,54 @@ using UnityEngine;
 
 namespace GameCore
 {
+    // public class Pair<K, V>
+    // {
+    //     private List<K> keys = new List<K>();
+    //     private List<V> values = new List<V>();
+
+    //     public void Add(K key, V value)
+    //     {
+    //         keys.Add(key);
+    //         values.Add(value);
+    //     }
+
+    //     public void Remove()
+    //     {
+
+    //     }
+    // }
+
+    public interface IEntity
+    {
+
+    }
+
+    public interface IEntityProvider
+    {
+        IEntity GetEntity(GameObject obj);
+    }
+
     public class AgentConfig
     {
         public readonly AgentType agentType;
         public readonly float size;
         public readonly float healthPoints;
         public readonly float movementSpeed;
+        public readonly float agentDetectionRadius;
 
         public AgentConfig(
             AgentType agentType,
             float size,
             float healthPoints,
-            float movementSpeed
+            float movementSpeed,
+            float agentDetectionRadius
         )
         {
-            this.agentType = agentType ?? throw new System.ArgumentNullException(nameof(agentType));
+            this.agentType = agentType;
             this.size = size;
             this.healthPoints = healthPoints;
             this.movementSpeed = movementSpeed;
+            this.agentDetectionRadius = agentDetectionRadius;
         }
     }
 
@@ -116,6 +146,8 @@ namespace GameCore
 
     public class GameCore : IAgentTypesProvider, IAgentPartiesProvider
     {
+        public readonly IEntityProvider entityProvider;
+
         private List<AgentType> agentTypesList = new List<AgentType>()
         {
             //     new AgentType("Neutral"),
@@ -139,15 +171,31 @@ namespace GameCore
         };
         public IReadOnlyDictionary<AgentTypeName, AgentType> AgentTypes => agentTypes;
 
+        private readonly AgentPartiesManager agentPartiesManager = new AgentPartiesManager(); public AgentPartiesManager AgentPartiesManager => agentPartiesManager;
         private readonly AgentParty playerParty = new AgentParty(); public AgentParty PlayerParty => playerParty;
         private readonly AgentParty enemyParty = new AgentParty(); public AgentParty EnemyParty => enemyParty;
 
-        public GameCore()
+        // private readonly Pair<GameObject, Agent> pair_gameObject_agent = new Pair<GameObject, Agent>();
+
+        public GameCore(
+            IEntityProvider entityProvider
+        )
         {
+            this.entityProvider = entityProvider;
+
             foreach (var agentType in agentTypes)
             {
                 agentTypesList.Add(agentType.Value);
             }
+
+            agentPartiesManager.AddParty(
+                party: playerParty,
+                enemyParties: new List<AgentParty>(){ enemyParty }
+            );
+            agentPartiesManager.AddParty(
+                party: enemyParty,
+                enemyParties: new List<AgentParty>(){ playerParty }
+            );
         }
     }
 }

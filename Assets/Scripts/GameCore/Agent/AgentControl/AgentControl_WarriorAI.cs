@@ -7,65 +7,65 @@ namespace GameCore
     public sealed class AgentControl_WarriorAI : AgentControl, IAgentControlTickable
     {
         private Agent agent;
-        private SM.StateMachine sm = new SM.StateMachine();
+        private SM.StateMachine stateMachine = new SM.StateMachine();
 
         public override void Setup(Agent agent)
         {
             this.agent = agent;
 
-            sm.SetState(new AgentAI.States.Patrol(agent));
-
             agent.AgentHealth.died += OnAgentDied;
-            // agent.agentDetection.enemyDetected += OnEnemyDetected;
-            // agent.agentDetection.enemyLost += OnEnemyLost;
+            // agent.AgentDetection.enemyAdded += OnEnemyAdded;
+            // agent.AgentDetection.enemyRemoved += OnEnemyRemoved;
+            Debug.Log("AgentControl_WarriorAI setup");
+            agent.AgentDetection.detectedEnemiesChanged += OnDetectedEnemiesChanged;
 
             // HandleEnemiesNumberChange();
+            stateMachine.SetState(new AgentAI.States.Patrol(agent));
         }
 
         public void OnUpdate()
         {
-            if (sm.State != null && sm.State is IAgentAITickableState state)
+            if (stateMachine.State != null && stateMachine.State is IAgentAITickableState state)
             {
                 state.OnUpdate();
             }
         }
 
-        // void OnEnemyDetected(Agent agent)
+        // void OnEnemyAdded(Agent agent)
         // {
         //     HandleEnemiesNumberChange();
         // }
 
-        // void OnEnemyLost(Agent agent)
+        // void OnEnemyRemoved(Agent agent)
         // {
         //     HandleEnemiesNumberChange();
         // }
 
-        // void HandleEnemiesNumberChange()
-        // {
-        //     // Debug.Log($"aliveEnemies.Count: {agent.agentDetection.aliveEnemies.Count}");
-        //     if (agent.agentDetection.aliveEnemies.Count > 0)
-        //     {
-        //         if (sm.State is AgentAI.States.ITemp_AgentAICombat combatState)
-        //         {
-        //             combatState.OnAliveEnemiesChanged(agent.agentDetection.aliveEnemies);
-        //         }
-        //         else
-        //         {
-        //             sm.SetState(new AgentAI.States.BetterCombat(agent));
-        //         }
-        //     }
-        //     else
-        //     {
-        //         sm.SetState(new AgentAI.States.Patrol(agent));
-        //     }
-        // }
+        void OnDetectedEnemiesChanged()
+        {
+            Debug.Log($"agent.AgentDetection.AliveEnemies: {agent.AgentDetection.AliveEnemies.Count}");
+            if (agent.AgentDetection.AliveEnemies.Count > 0)
+            {
+                if (stateMachine.State is AgentAI.States.BetterCombat combatState)
+                {
+                    combatState.OnAliveEnemiesChanged(agent.AgentDetection.AliveEnemies);
+                }
+                else
+                {
+                    stateMachine.SetState(new AgentAI.States.BetterCombat(agent));
+                }
+            }
+            else
+            {
+                stateMachine.SetState(new AgentAI.States.Patrol(agent));
+            }
+        }
 
         void OnAgentDied()
         {
-            // this.agent.agentDetection.enemyDetected -= OnEnemyDetected;
-            // this.agent.agentDetection.enemyLost -= OnEnemyLost;
+            this.agent.AgentDetection.detectedEnemiesChanged -= OnDetectedEnemiesChanged;
 
-            sm.Exit();
+            stateMachine.Exit();
         }
     }
 }

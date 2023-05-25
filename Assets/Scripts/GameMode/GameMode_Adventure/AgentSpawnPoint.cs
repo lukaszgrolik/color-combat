@@ -31,7 +31,7 @@ namespace GameMode
             ["Arcane"] = AgentTypeName.Arcane,
         };
 
-        private CustomDistributionSampler<float> enemySizeDist = new CustomDistributionSampler<float>(new Dictionary<float, int>()
+        private LukRandom.CustomDistribution.Sampler<float> enemySizeDist = new LukRandom.CustomDistribution.Sampler<float>(new Dictionary<float, int>()
         {
             [.5f] = 1,
             [.75f] = 2,
@@ -75,9 +75,10 @@ namespace GameMode
                 agentType: agentType,
                 size: size,
                 healthPoints: baseHealth * size * Random.Range(1f, 2f),
-                movementSpeed: Random.Range(2f, 4f)
+                movementSpeed: Random.Range(2f, 4f),
+                agentDetectionRadius: 10f
             );
-            var agentData = dataset.agents.Sample();
+            var agentData = LukRandom.Uniform.Sample(dataset.agents);
 
             for (int i = 0; i < amount; i++)
             {

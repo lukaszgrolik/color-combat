@@ -76,9 +76,10 @@ namespace GameDataDef
 
     }
 
-    // agent type:
+    // agent spawn type:
     // lifetime - normal, temporary
-    // movement - normal, stationary
+    // movement - moving, stationary
+    // collider - colliding, transparent
 
     public class Agent
     {

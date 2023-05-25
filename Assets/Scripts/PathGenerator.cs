@@ -56,7 +56,7 @@ public class PathGenerator : MonoBehaviour
         var lineFrom = Vector3.zero;
         foreach (Transform point in transform)
         {
-            var prefab = prefabs.Sample();
+            var prefab = LukRandom.Uniform.Sample(prefabs);
 
             if (i != 0)
             {

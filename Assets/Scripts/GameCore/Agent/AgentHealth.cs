@@ -39,11 +39,12 @@ namespace GameCore
         // private float healthReplenishRate = 1f;
         // private float healthReplenishAmount = 5f;
         // private float lastHealthReplenishTime;
+        public bool IsDead => currentHealth == 0;
 
         public event System.Action healthChanged;
         public event System.Action died;
 
-        public void Setup(
+        public AgentHealth(
             IRegistry registry,
             IAgentTypesProvider agentTypesProvider,
             AgentType agentType,

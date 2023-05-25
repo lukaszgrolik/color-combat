@@ -23,7 +23,7 @@ namespace GameMode
 
         private List<int> enemiesAmountDist = new List<int>(){1, 1, 1, 1, 1, 2, 2, 2, 3, 3};
 
-        private CustomDistributionSampler<float> enemySizeDist = new CustomDistributionSampler<float>(new Dictionary<float, int>(){
+        private LukRandom.CustomDistribution.Sampler<float> enemySizeDist = new LukRandom.CustomDistribution.Sampler<float>(new Dictionary<float, int>(){
             [.5f] = 1,
             [.75f] = 2,
             [1] = 8,
@@ -57,21 +57,22 @@ namespace GameMode
         }
 
         void SpawnEnemies() {
-            var amount = enemiesAmountDist.Sample();
+            var amount = LukRandom.Uniform.Sample(enemiesAmountDist);
 
             var circlePos2d = Random.insideUnitCircle.normalized * spawnRadius;
             var pos = transform.position + new Vector3(circlePos2d.x, 0, circlePos2d.y);
 
-            var agentType = agentTypesProvider.AgentTypesList.Sample();
+            var agentType = LukRandom.Uniform.Sample(agentTypesProvider.AgentTypesList);
             var size = enemySizeDist.Sample();
             var baseHealth = 100f;
             var agentConfig = new AgentConfig(
                 agentType: agentType,
                 size: size,
                 healthPoints: baseHealth * size * Random.Range(1f, 2f),
-                movementSpeed: Random.Range(1f, 2f)
+                movementSpeed: Random.Range(1f, 2f),
+                agentDetectionRadius: 10f
             );
-            var agentData = dataset.agents.Sample();
+            var agentData = LukRandom.Uniform.Sample(dataset.agents);
 
             for (int i = 0; i < amount; i++)
             {

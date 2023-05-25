@@ -31,7 +31,7 @@ namespace GameCore
 
         public event System.Action arrived;
 
-        public void Setup(
+        public AgentMovement(
             IPrefabsProvider prefabsProvider,
             IRegistry registry,
             NavMeshAgent navMeshAgent,

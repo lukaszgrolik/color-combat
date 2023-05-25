@@ -17,6 +17,8 @@ namespace GameCore.AgentAI.States
 
         public override void Enter()
         {
+            Debug.Log("switched to patrol");
+
             patrolSM.SetState(new PatrolStates.Moving(agent));
 
             // agent.stun.stunEnded += OnAgentStunEnded;

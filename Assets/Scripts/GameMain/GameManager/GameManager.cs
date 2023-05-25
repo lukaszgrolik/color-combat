@@ -22,6 +22,21 @@ namespace GameMain
     //     Agent GetAgentByGameObject(GameObject obj, AgentParty omitAgentParty = null);
     // }
 
+    class EntityProvider : GameCore.IEntityProvider
+    {
+        private GameManager gameManager;
+
+        public EntityProvider(GameManager gameManager)
+        {
+            this.gameManager = gameManager;
+        }
+
+        public IEntity GetEntity(GameObject obj)
+        {
+            return gameManager.Dict_gameObject_agent[obj];
+        }
+    }
+
     public class GameManager : MonoBehaviour, IPrefabsProvider, IGameLayerMasksProvider, IRegistry, IRegistryAgents
     {
         [SerializeField] private LayerMask uiLayerMask;              public LayerMask UILayerMask => uiLayerMask;
@@ -55,7 +70,9 @@ namespace GameMain
         private List<Agent> agents = new List<Agent>();
         private List<Projectile> projectiles = new List<Projectile>();
 
-        private Dictionary<GameObject, Agent> dict_gameObject_agent = new Dictionary<GameObject, Agent>();
+        private IEntityProvider entityProvider;
+        private Dictionary<GameObject, Agent> dict_gameObject_entity = new Dictionary<GameObject, Agent>(); public Dictionary<GameObject, Agent> Dict_gameObject_entity => dict_gameObject_entity;
+        private Dictionary<GameObject, Agent> dict_gameObject_agent = new Dictionary<GameObject, Agent>(); public Dictionary<GameObject, Agent> Dict_gameObject_agent => dict_gameObject_agent;
 
         private GameCore.GameCore gameCore;
         private GameMode.GameModeManager gameModeManager;
@@ -74,7 +91,10 @@ namespace GameMain
             var dataset = new GameDataInst.Inst1.Dataset().main;
             dataset.LoadResources();
 
-            gameCore = new GameCore.GameCore();
+            entityProvider = new EntityProvider(this);
+            gameCore = new GameCore.GameCore(
+                entityProvider: entityProvider
+            );
             gameModeManager = new GameMode.GameModeManager(
                 gameCore: gameCore,
                 registry: this,
@@ -177,6 +197,8 @@ namespace GameMain
 
             var agent = agentObj.AddComponent<Agent>();
             agent.Setup(
+                agentPartiesManager: gameCore.AgentPartiesManager,
+                entityProvider: entityProvider,
                 agentConfig: agentConfig,
                 agentData: agentData,
                 // agentParty: gameCore.EnemyParty,
@@ -223,6 +245,7 @@ namespace GameMain
         {
             agents.Add(agent);
             dict_gameObject_agent.Add(obj, agent);
+            dict_gameObject_entity.Add(obj, agent);
         }
 
         void UnregisterAgent(GameObject obj)
@@ -230,6 +253,7 @@ namespace GameMain
             var agent = dict_gameObject_agent[obj];
             agents.Remove(agent);
             dict_gameObject_agent.Remove(obj);
+            dict_gameObject_entity.Remove(obj);
         }
 
         public Agent GetAgentByGameObject(GameObject obj, AgentParty omitAgentParty = null)

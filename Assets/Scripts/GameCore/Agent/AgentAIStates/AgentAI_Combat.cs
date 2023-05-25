@@ -1,6 +1,6 @@
-// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 // /*
 //     Combat states:
@@ -10,92 +10,95 @@
 //             UseSkill
 // */
 
-// namespace GameCore.AgentAI.States
-// {
-//     // choose action (target & attack OR some (defensive) spell)
-//     // choose target | select melee/range skill | get close (or get further if to close in case of range attack)
-//     // attack | wait for attack end | attack again
+namespace GameCore.AgentAI.States
+{
+    // choose action (target & attack OR some (defensive) spell)
+    // choose target | select melee/range skill | get close (or get further if to close in case of range attack)
+    // attack | wait for attack end | attack again
 
-//     public interface ITemp_AgentAICombat
-//     {
-//         void OnAliveEnemiesChanged(List<Agent> aliveEnemyAgents);
-//     }
+    public interface ITemp_AgentAICombat
+    {
+        void OnAliveEnemiesChanged(List<Agent> aliveEnemyAgents);
+    }
 
-//     class BetterCombat : SM.State, ITemp_AgentAICombat
-//     {
-//         private readonly Agent agent;
-//         private readonly EngineTime engineTime;
+    class BetterCombat : SM.State, ITemp_AgentAICombat
+    {
+        private readonly Agent agent;
+        private readonly EngineTime engineTime;
 
-//         private SM.StateMachine combatSM = new SM.StateMachine();
+        private SM.StateMachine combatSM = new SM.StateMachine();
 
-//         private Agent enemyAgent;
+        private Agent enemyAgent;
 
-//         // private float lastAttackTime;
+        // private float lastAttackTime;
 
-//         public BetterCombat(Agent agent)
-//         {
-//             this.agent = agent;
-//             this.engineTime = agent.game.engineTime;
-//             // this.enemy = enemy;
-//         }
+        public BetterCombat(Agent agent)
+        {
+            this.agent = agent;
+            // this.engineTime = agent.game.engineTime;
+            // this.enemy = enemy;
+        }
 
-//         public override void Enter()
-//         {
-//             // lastAttackTime = engineTime.Time;
-//             SelectAction();
-//         }
+        public override void Enter()
+        {
+            Debug.Log("switched to combat");
+            // lastAttackTime = engineTime.Time;
+            SelectAction();
+        }
 
-//         public override void Exit()
-//         {
-//             combatSM.Exit();
-//         }
+        public override void Exit()
+        {
+            combatSM.Exit();
+        }
 
-//         void SelectAction()
-//         {
-//             this.enemyAgent = agent.agentDetection.aliveEnemies.Random();
+        void SelectAction()
+        {
+            this.enemyAgent = LukRandom.Uniform.Sample(agent.AgentDetection.AliveEnemies);
 
-//             Skill skill = null;
-//             if (agent.combat.ProjectileSkills.Count > 0)
-//             {
-//                 skill = agent.combat.ProjectileSkills.Random();
+            agent.AgentMovement.SetDestination(enemyAgent.gameObject.transform.position);
 
-//             }
-//             else if (agent.combat.MeleeAttackSkills.Count > 0)
-//             {
-//                 skill = agent.combat.MeleeAttackSkills.Random();
-//             }
+            // Skill skill = null;
+            // if (agent.AgentCombat.ProjectileSkills.Count > 0)
+            // {
+            //     skill = agent.AgentCombat.ProjectileSkills.Random();
 
-//             agent.combat.SetActiveSkill(skill);
+            // }
+            // else if (agent.AgentCombat.MeleeAttackSkills.Count > 0)
+            // {
+            //     skill = agent.AgentCombat.MeleeAttackSkills.Random();
+            // }
 
-//             combatSM.SetState(new CombatStates.Engage(agent, enemyAgent));
-//         }
+            // agent.AgentCombat.SetActiveSkill(skill);
 
-//         public void OnAliveEnemiesChanged(List<Agent> aliveEnemyAgents)
-//         {
-//             if (aliveEnemyAgents.Contains(enemyAgent) == false)
-//             {
-//                 SelectAction();
-//             }
-//         }
+            // combatSM.SetState(new CombatStates.Engage(agent, enemyAgent));
+        }
 
-//         void OnAgentHealthChanged()
-//         {
-//             // flee if received enough damage (or any ally nearby got killed or received damage - control via "courage" agent property?)
-//         }
+        public void OnAliveEnemiesChanged(List<Agent> aliveEnemyAgents)
+        {
+            if (aliveEnemyAgents.Contains(enemyAgent) == false)
+            {
+                SelectAction();
+            }
+        }
 
-//         // public void OnUpdate()
-//         // {
-//         //     if (engineTime.SecondsFrom(lastAttackTime) > .5)
-//         //     {
-//         //         lastAttackTime = engineTime.Time;
+        void OnAgentHealthChanged()
+        {
+            // flee if received enough damage (or any ally nearby got killed or received damage - control via "courage" agent property?)
+        }
 
-//         //         // @temp set to projectile attack
-//         //         // agent.combat.SetActiveSkill(agent.combat.Skills[1]);
+        // public void OnUpdate()
+        // {
+        //     if (engineTime.SecondsFrom(lastAttackTime) > .5)
+        //     {
+        //         lastAttackTime = engineTime.Time;
 
-//         //         agent.combat.Attack(enemy);
-//         //     }
-//         // }
-//     }
+        //         // @temp set to projectile attack
+        //         // agent.combat.SetActiveSkill(agent.combat.Skills[1]);
+
+        //         agent.combat.Attack(enemy);
+        //     }
+        // }
+    }
 
 //     class Combat : SM.State, IAgentAITickableState, ITemp_AgentAICombat
 //     {
@@ -148,4 +151,4 @@
 
 //         }
 //     }
-// }
+}

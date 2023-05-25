@@ -80,15 +80,16 @@ namespace GameMain
                 agentAttacking.ToggleProjectileSpawnMode();
             }
 
+            if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetMouseButtonUp(0))
+            {
+                agentAttacking.DisableAttack();
+            }
+
             if (Input.GetKey(KeyCode.LeftShift))
             {
                 if (Input.GetMouseButtonDown(0))
                 {
                     agentAttacking.EnableAttack();
-                }
-                else if (Input.GetMouseButtonUp(0))
-                {
-                    agentAttacking.DisableAttack();
                 }
 
                 if (Input.GetMouseButton(0))
