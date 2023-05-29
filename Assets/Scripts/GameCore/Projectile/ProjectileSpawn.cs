@@ -5,11 +5,12 @@ using UnityEngine.AI;
 
 namespace GameCore
 {
-    public abstract class ProjectileSpawn
+    public class ProjectileSpawn
     {
         private IPrefabsProvider prefabsProvider;
         private IRegistry registry;
         private IGameLayerMasksProvider layerMasksProvider;
+        private GameDataDef.SkillSpawnMode_Shoot shootSkill;
         private MonoBehaviour agentMB;
         private AgentParty agentParty;
         private AgentType damageMode;
@@ -18,6 +19,7 @@ namespace GameCore
             IPrefabsProvider prefabsProvider,
             IRegistry registry,
             IGameLayerMasksProvider layerMasksProvider,
+            GameDataDef.SkillSpawnMode_Shoot shootSkill,
             MonoBehaviour agentMB,
             AgentParty agentParty,
             AgentType damageMode
@@ -26,12 +28,40 @@ namespace GameCore
             this.prefabsProvider = prefabsProvider;
             this.registry = registry;
             this.layerMasksProvider = layerMasksProvider;
+            this.shootSkill = shootSkill;
             this.agentMB = agentMB;
             this.agentParty = agentParty;
             this.damageMode = damageMode;
         }
 
-        abstract public void Spawn(float angleToTarget);
+        public void Spawn(float angleToTarget)
+        {
+            // Debug.Log($"shootSkill.count: {shootSkill.count} | shootSkill.angle: {shootSkill.angle}");
+
+            if (shootSkill.count == 1)
+            {
+                SpawnSingle(angleToTarget);
+            }
+            else
+            {
+                var stepsAmount = shootSkill.count - 1;
+                var angleStep = shootSkill.angle / stepsAmount;
+                var startAngle = angleToTarget - shootSkill.angle / 2;
+
+                for (int i = 0; i < shootSkill.count; i++)
+                {
+                    var singleAngle = startAngle + angleStep * i;
+
+                    SpawnSingle(singleAngle);
+                }
+            }
+        }
+
+        public void SetShootSkill(GameDataDef.SkillSpawnMode_Shoot shootSkill)
+        {
+            this.shootSkill = shootSkill;
+
+        }
 
         public void SetDamageMode(AgentType damageMode)
         {

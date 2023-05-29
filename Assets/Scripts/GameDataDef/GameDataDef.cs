@@ -66,49 +66,6 @@ namespace GameDataDef
 
 namespace GameDataDef
 {
-    public class ItemCategory
-    {
-
-    }
-
-    public class Item
-    {
-
-    }
-
-    // agent spawn type:
-    // lifetime - normal, temporary
-    // movement - moving, stationary
-    // collider - colliding, transparent
-
-    public class Agent
-    {
-        public readonly string name;
-        public readonly List<Skill> skills;
-        public readonly ResourceGameObject prefab;
-
-        public Agent(
-            string name,
-            List<Skill> skills,
-            ResourceGameObject prefab
-        )
-        {
-            this.name = name;
-            this.skills = skills;
-            this.prefab = prefab;
-        }
-    }
-
-    public class Location
-    {
-        public Location(
-            List<Agent> agents
-        )
-        {
-
-        }
-    }
-
     public class Dataset
     {
         private ResourceObjectsLoader resourceObjectsLoader = new ResourceObjectsLoader();

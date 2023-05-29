@@ -5,53 +5,13 @@ using UnityEngine.AI;
 
 namespace GameCore
 {
-    abstract class Attack
-    {
-
-    }
-
-    class Attack_Melee : Attack
-    {
-
-    }
-
-    class Attack_Projectile : Attack
-    {
-
-    }
-
-    // originator, custom
-    abstract class ProjectilePosition
-    {
-
-    }
-
-    // zig-zag, wandering, circle around
-    abstract class ProjectileTrajectory
-    {
-
-    }
-
-    // auto-lock
-    abstract class ProjectileAim
-    {
-
-    }
-
-    // piercing, jumping, splitting
-    // piercing - chance to pierce, max pierced
-    abstract class ProjectileHitBehavior
-    {
-
-    }
-
     public interface IAgentAttacking
     {
         void SetDamageMode(AgentType agentType);
         void EnableAttack();
         void DisableAttack();
         void SetAttackTarget(Vector3? point);
-        void ToggleProjectileSpawnMode();
+        void ToggleSkill();
     }
 
     public class AgentCombat : IAgentAttacking
@@ -62,18 +22,21 @@ namespace GameCore
         private IGameLayerMasksProvider layerMasksProvider;
         private MonoBehaviour agentMB;
         private NavMeshAgent navMeshAgent;
+        private GameDataDef.Agent agentConfig;
         private AgentParty agentParty;
         private AgentMovement agentMovement;
 
-        private float attackRate = 5f;
-
         private AgentType damageMode;
 
-        private List<ProjectileSpawn> projectileSpawns;
-        private ProjectileSpawn currentProjectileSpawn;
+        private List<GameDataDef.Skill> skills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> Skills => skills;
+        private List<GameDataDef.Skill> projectileSkills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> ProjectileSkills => projectileSkills;
+        private GameDataDef.Skill activeSkill;
+
+        private ProjectileSpawn projectileSpawn;
 
         private bool attackEnabled = false;
         private Vector3? attackTargetPos = null;
+        private Agent attackTargetAgent = null;
         private float attackLastTime = -1f;
 
         public AgentCombat(
@@ -83,6 +46,7 @@ namespace GameCore
             IGameLayerMasksProvider layerMasksProvider,
             MonoBehaviour agentMB,
             NavMeshAgent navMeshAgent,
+            GameDataDef.Agent agentConfig,
             AgentParty agentParty,
             AgentMovement agentMovement
         )
@@ -93,81 +57,83 @@ namespace GameCore
             this.layerMasksProvider = layerMasksProvider;
             this.agentMB = agentMB;
             this.navMeshAgent = navMeshAgent;
+            this.agentConfig = agentConfig;
             this.agentParty = agentParty;
             this.agentMovement = agentMovement;
 
             this.damageMode = agentTypesProvider.AgentTypesList[0];
 
-            this.projectileSpawns = new List<ProjectileSpawn>()
+            foreach (var skill in agentConfig.skills)
             {
-                new ProjectileSpawn_Single(
-                    prefabsProvider,
-                    registry,
-                    layerMasksProvider,
-                    agentMB,
-                    agentParty,
-                    damageMode
-                ),
-                new ProjectileSpawn_Multi(
-                    prefabsProvider,
-                    registry,
-                    layerMasksProvider,
-                    agentMB,
-                    agentParty,
-                    damageMode,
-                    angle: 30f,
-                    amount: 5
-                ),
-                new ProjectileSpawn_Multi(
-                    prefabsProvider,
-                    registry,
-                    layerMasksProvider,
-                    agentMB,
-                    agentParty,
-                    damageMode,
-                    angle: 360f,
-                    amount: 24
-                ),
-            };
-            this.currentProjectileSpawn = this.projectileSpawns[0];
+                skills.Add(skill);
+
+                if (skill.mode is GameDataDef.SkillMode_Spawn skillMode_spawn)
+                {
+                    if (skillMode_spawn.mode is GameDataDef.SkillSpawnMode_Shoot skillSpawnMode_shoot)
+                    {
+                        projectileSkills.Add(skill);
+                    }
+                }
+            }
+
+            this.activeSkill = this.skills[0];
+
+            this.projectileSpawn = new ProjectileSpawn(
+                prefabsProvider,
+                registry,
+                layerMasksProvider,
+                shootSkill: (activeSkill.mode as GameDataDef.SkillMode_Spawn).mode as GameDataDef.SkillSpawnMode_Shoot,
+                agentMB,
+                agentParty,
+                damageMode
+            );
         }
 
         public void OnUpdate()
         {
-            if (attackEnabled && Time.time - attackLastTime >= 1 / attackRate)
+            if (attackEnabled && Time.time - attackLastTime >= 1 / agentConfig.castRate)
             {
                 attackLastTime = Time.time;
 
-                if (attackTargetPos != null)
+                if (attackTargetAgent != null || attackTargetPos != null)
                 {
-                    Attack((Vector3)attackTargetPos);
+                    var pos = attackTargetAgent != null ? attackTargetAgent.transform.position : (Vector3)attackTargetPos;
+
+                    Attack(pos);
                 }
             }
+        }
+
+        public void SetActiveSkill(GameDataDef.Skill skill)
+        {
+            if (skills.Contains(skill) == false) throw new System.Exception();
+
+            this.activeSkill = skill;
+
+            projectileSpawn.SetShootSkill((skill.mode as GameDataDef.SkillMode_Spawn).mode as GameDataDef.SkillSpawnMode_Shoot);
         }
 
         public void SetDamageMode(AgentType agentType)
         {
             damageMode = agentType;
-            currentProjectileSpawn.SetDamageMode(agentType);
+            projectileSpawn.SetDamageMode(agentType);
         }
 
-        public void ToggleProjectileSpawnMode()
+        public void ToggleSkill()
         {
-            var index = projectileSpawns.IndexOf(currentProjectileSpawn);
-            var nextIndex = index == projectileSpawns.Count - 1 ? 0 : index + 1;
-            currentProjectileSpawn = projectileSpawns[nextIndex];
+            SetActiveSkill(skills.NextOrFirst(activeSkill));
         }
 
-        void Damage(
-            Agent attackerAgent,
-            Agent targetAgent,
-            // AgentColor damageColor,
-            float damagePoints
-        )
-        {
-            // negative effects: add hp, inc speed, multiply, shoot back
-            // targetAgent.TakeDamage(Random.Range(25, 75 + 1));
-        }
+        // void Damage(
+        //     Agent attackerAgent,
+        //     Agent targetAgent,
+        //     // AgentColor damageColor,
+        //     float damagePoints
+        // )
+        // {
+        //     // negative effects: add hp, inc speed, multiply, shoot back
+        //     // targetAgent.TakeDamage(Random.Range(25, 75 + 1));
+        // }
 
         public void EnableAttack()
         {
@@ -184,6 +150,11 @@ namespace GameCore
             attackTargetPos = point;
         }
 
+        public void SetAttackTarget(Agent agent)
+        {
+            attackTargetAgent = agent;
+        }
+
         void Attack(Vector3 targetPos)
         {
             agentMovement.Cancel();
@@ -195,7 +166,7 @@ namespace GameCore
 
             agentMB.transform.rotation = Quaternion.Euler(0, angle, 0);
 
-            currentProjectileSpawn.Spawn(angle);
+            projectileSpawn.Spawn(angle);
         }
     }
 }

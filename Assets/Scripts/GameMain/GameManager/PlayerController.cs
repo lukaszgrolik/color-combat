@@ -77,7 +77,7 @@ namespace GameMain
         {
             if (Input.GetKeyUp(KeyCode.Q))
             {
-                agentAttacking.ToggleProjectileSpawnMode();
+                agentAttacking.ToggleSkill();
             }
 
             if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetMouseButtonUp(0))

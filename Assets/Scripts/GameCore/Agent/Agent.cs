@@ -87,6 +87,7 @@ namespace GameCore
                 layerMasksProvider,
                 agentMB: this,
                 navMeshAgent: navMeshAgent,
+                agentConfig: agentData,
                 agentParty,
                 agentMovement: this.agentMovement
             );

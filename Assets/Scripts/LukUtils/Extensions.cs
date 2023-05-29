@@ -8,6 +8,15 @@ public static class ArrayExtensions
 
 public static class ListExtensions
 {
+    public static T NextOrFirst<T>(this List<T> list, T currentItem)
+    {
+        var index = list.IndexOf(currentItem);
+        if (index == -1) return default(T);
+
+        var nextIndex = index == list.Count - 1 ? 0 : index + 1;
+
+        return list[nextIndex];
+    }
 
 }
 

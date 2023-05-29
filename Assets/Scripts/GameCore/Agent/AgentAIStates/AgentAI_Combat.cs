@@ -43,32 +43,37 @@ namespace GameCore.AgentAI.States
         {
             Debug.Log("switched to combat");
             // lastAttackTime = engineTime.Time;
-            SelectAction();
+            SelectActionOnDetectedEnemies();
         }
 
         public override void Exit()
         {
+            agent.AgentCombat.DisableAttack();
+
             combatSM.Exit();
         }
 
-        void SelectAction()
+        void SelectActionOnDetectedEnemies()
         {
             this.enemyAgent = LukRandom.Uniform.Sample(agent.AgentDetection.AliveEnemies);
+            // this.enemyAgent.AgentHealth.healthChanged += OnEnemyAgentHealthChanged;
 
-            agent.AgentMovement.SetDestination(enemyAgent.gameObject.transform.position);
+            // agent.AgentMovement.SetDestination(enemyAgent.gameObject.transform.position);
 
-            // Skill skill = null;
-            // if (agent.AgentCombat.ProjectileSkills.Count > 0)
-            // {
-            //     skill = agent.AgentCombat.ProjectileSkills.Random();
+            GameDataDef.Skill skill = null;
+            if (agent.AgentCombat.ProjectileSkills.Count > 0)
+            {
+                skill = LukRandom.Uniform.Sample(agent.AgentCombat.ProjectileSkills);
 
-            // }
+            }
             // else if (agent.AgentCombat.MeleeAttackSkills.Count > 0)
             // {
             //     skill = agent.AgentCombat.MeleeAttackSkills.Random();
             // }
 
-            // agent.AgentCombat.SetActiveSkill(skill);
+            agent.AgentCombat.SetActiveSkill(skill);
+            agent.AgentCombat.SetAttackTarget(enemyAgent);
+            agent.AgentCombat.EnableAttack();
 
             // combatSM.SetState(new CombatStates.Engage(agent, enemyAgent));
         }
@@ -77,7 +82,7 @@ namespace GameCore.AgentAI.States
         {
             if (aliveEnemyAgents.Contains(enemyAgent) == false)
             {
-                SelectAction();
+                SelectActionOnDetectedEnemies();
             }
         }
 
@@ -85,6 +90,14 @@ namespace GameCore.AgentAI.States
         {
             // flee if received enough damage (or any ally nearby got killed or received damage - control via "courage" agent property?)
         }
+
+        // void OnEnemyAgentHealthChanged()
+        // {
+        //     if (enemyAgent.AgentHealth.CurrentHealth == 0)
+        //     {
+        //         agent.AgentCombat.DisableAttack();
+        //     }
+        // }
 
         // public void OnUpdate()
         // {

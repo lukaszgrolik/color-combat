@@ -43,7 +43,7 @@ namespace GameCore
 
         void OnDetectedEnemiesChanged()
         {
-            Debug.Log($"agent.AgentDetection.AliveEnemies: {agent.AgentDetection.AliveEnemies.Count}");
+            // Debug.Log($"agent.AgentDetection.AliveEnemies: {agent.AgentDetection.AliveEnemies.Count}");
             if (agent.AgentDetection.AliveEnemies.Count > 0)
             {
                 if (stateMachine.State is AgentAI.States.BetterCombat combatState)
