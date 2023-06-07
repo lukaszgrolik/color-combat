@@ -55,12 +55,6 @@ namespace GameCore
             this.agentHealth = new AgentHealth(registry, agentTypesProvider, agentConfig.agentType, agentConfig.healthPoints);
             this.agentHealth.died += OnAgentDied;
 
-            this.agentDamage = new AgentDamage(
-                agentTypesProvider: agentTypesProvider,
-                agentType: agentConfig.agentType,
-                agentHealth: agentHealth
-            );
-
             var mb_agentDetection = GetComponentInChildren<AgentDetectionScript>();
             mb_agentDetection.Setup(
                 entityProvider: entityProvider,
@@ -73,6 +67,7 @@ namespace GameCore
 
             var navMeshAgent = GetComponent<NavMeshAgent>();
             this.agentMovement = new AgentMovement(
+                engineTime: engineTime,
                 prefabsProvider: prefabsProvider,
                 registry: registry,
                 navMeshAgent: navMeshAgent,
@@ -82,6 +77,7 @@ namespace GameCore
 
             this.agentCombat = new AgentCombat(
                 prefabsProvider,
+                engineTime,
                 agentTypesProvider,
                 registry,
                 layerMasksProvider,
@@ -90,6 +86,25 @@ namespace GameCore
                 agentConfig: agentData,
                 agentParty,
                 agentMovement: this.agentMovement
+            );
+
+            this.agentDamage = new AgentDamage(
+                agentEntity: this,
+                agentTypesProvider: agentTypesProvider,
+                registry: registry,
+                entityProvider: entityProvider,
+                agentConfig: agentConfig,
+                agentData: agentData,
+                agentControl: agentControl,
+                agentParty: agentParty,
+                agentType: agentConfig.agentType,
+                agentHealth: agentHealth,
+                agentMovement: agentMovement,
+                agentCombat: agentCombat,
+                agentDamageProcessor: new AgentDamageProcessor(
+                    agentTypesProvider: agentTypesProvider,
+                    agentType: agentConfig.agentType
+                )
             );
 
             // var spriteRend = GetComponentInChildren<SpriteRenderer>();
@@ -114,6 +129,7 @@ namespace GameCore
 
         public void OnUpdate()
         {
+            agentMovement.OnUpdate();
             if (agentControl is IAgentControlTickable _agentControl) _agentControl.OnUpdate();
             agentCombat.OnUpdate();
         }

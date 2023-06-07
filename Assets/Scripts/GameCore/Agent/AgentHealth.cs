@@ -21,6 +21,7 @@ namespace GameCore
     public interface IAgentHealthTakeDamage
     {
         void TakeDamage(float points);
+        void Heal(float points);
     }
 
     public class AgentHealth : IAgentHealth, IAgentHealthExtended, IAgentHealthTakeDamage
@@ -61,6 +62,8 @@ namespace GameCore
 
         public void TakeDamage(float points)
         {
+            if (points > 0 == false) throw new System.Exception("Damage must be greater than zero");
+
             currentHealth -= points;
 
             if (currentHealth < 0)
@@ -74,6 +77,17 @@ namespace GameCore
             {
                 died?.Invoke();
             }
+        }
+
+        public void Heal(float points)
+        {
+            if (points > 0 == false) throw new System.Exception("Heal points must be greater than zero");
+
+            currentHealth += points;
+
+            if (currentHealth > maxHealth) currentHealth = maxHealth;
+
+            healthChanged?.Invoke();
         }
     }
 }

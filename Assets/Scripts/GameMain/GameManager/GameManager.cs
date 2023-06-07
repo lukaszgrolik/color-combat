@@ -33,7 +33,12 @@ namespace GameMain
 
         public IEntity GetEntity(GameObject obj)
         {
-            return gameManager.Dict_gameObject_agent[obj];
+            return gameManager.Dict_gameObject_entity[obj];
+        }
+
+        public GameObject GetObject(IEntity entity)
+        {
+            return gameManager.Dict_entity_gameObject[entity];
         }
     }
 
@@ -72,7 +77,8 @@ namespace GameMain
 
         private IEntityProvider entityProvider;
         private Dictionary<GameObject, Agent> dict_gameObject_entity = new Dictionary<GameObject, Agent>(); public Dictionary<GameObject, Agent> Dict_gameObject_entity => dict_gameObject_entity;
-        private Dictionary<GameObject, Agent> dict_gameObject_agent = new Dictionary<GameObject, Agent>(); public Dictionary<GameObject, Agent> Dict_gameObject_agent => dict_gameObject_agent;
+        private Dictionary<IEntity, GameObject> dict_entity_gameObject = new Dictionary<IEntity, GameObject>(); public Dictionary<IEntity, GameObject> Dict_entity_gameObject => dict_entity_gameObject;
+        // private Dictionary<GameObject, Agent> dict_gameObject_agent = new Dictionary<GameObject, Agent>(); public Dictionary<GameObject, Agent> Dict_gameObject_agent => dict_gameObject_agent;
 
         private GameCore.GameCore gameCore;
         private GameMode.GameModeManager gameModeManager;
@@ -244,21 +250,23 @@ namespace GameMain
         void RegisterAgent(Agent agent, GameObject obj)
         {
             agents.Add(agent);
-            dict_gameObject_agent.Add(obj, agent);
+            // dict_gameObject_agent.Add(obj, agent);
             dict_gameObject_entity.Add(obj, agent);
+            dict_entity_gameObject.Add(agent, obj);
         }
 
         void UnregisterAgent(GameObject obj)
         {
-            var agent = dict_gameObject_agent[obj];
+            var agent = dict_gameObject_entity[obj];
             agents.Remove(agent);
-            dict_gameObject_agent.Remove(obj);
+            // dict_gameObject_agent.Remove(obj);
             dict_gameObject_entity.Remove(obj);
+            dict_entity_gameObject.Remove(agent);
         }
 
         public Agent GetAgentByGameObject(GameObject obj, AgentParty omitAgentParty = null)
         {
-            dict_gameObject_agent.TryGetValue(obj, out var agent);
+            dict_gameObject_entity.TryGetValue(obj, out var agent);
 
             if (!agent) return null;
             // Debug.Log(agent.AgentParty);

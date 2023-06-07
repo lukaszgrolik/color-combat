@@ -29,6 +29,7 @@ namespace GameCore
     public interface IEntityProvider
     {
         IEntity GetEntity(GameObject obj);
+        GameObject GetObject(IEntity entity);
     }
 
     public class AgentConfig

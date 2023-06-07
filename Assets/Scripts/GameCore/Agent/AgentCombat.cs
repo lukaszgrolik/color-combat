@@ -16,20 +16,21 @@ namespace GameCore
 
     public class AgentCombat : IAgentAttacking
     {
-        private IPrefabsProvider prefabsProvider;
-        private IAgentTypesProvider agentTypesProvider;
-        private IRegistry registry;
-        private IGameLayerMasksProvider layerMasksProvider;
-        private MonoBehaviour agentMB;
-        private NavMeshAgent navMeshAgent;
-        private GameDataDef.Agent agentConfig;
-        private AgentParty agentParty;
-        private AgentMovement agentMovement;
+        private readonly IPrefabsProvider prefabsProvider;
+        private readonly IReadOnlyEngineTime engineTime;
+        private readonly IAgentTypesProvider agentTypesProvider;
+        private readonly IRegistry registry;
+        private readonly IGameLayerMasksProvider layerMasksProvider;
+        private readonly MonoBehaviour agentMB;
+        private readonly NavMeshAgent navMeshAgent;
+        private readonly GameDataDef.Agent agentConfig;
+        private readonly AgentParty agentParty;
+        private readonly AgentMovement agentMovement;
 
         private AgentType damageMode;
 
-        private List<GameDataDef.Skill> skills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> Skills => skills;
-        private List<GameDataDef.Skill> projectileSkills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> ProjectileSkills => projectileSkills;
+        private readonly List<GameDataDef.Skill> skills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> Skills => skills;
+        private readonly List<GameDataDef.Skill> projectileSkills = new List<GameDataDef.Skill>(); public List<GameDataDef.Skill> ProjectileSkills => projectileSkills;
         private GameDataDef.Skill activeSkill;
 
         private ProjectileSpawn projectileSpawn;
@@ -39,8 +40,12 @@ namespace GameCore
         private Agent attackTargetAgent = null;
         private float attackLastTime = -1f;
 
+        private float castRateMultiplier = 1f; public float CastRateMultiplier => castRateMultiplier;
+        private float castRateResetTime = -1;
+
         public AgentCombat(
             IPrefabsProvider prefabsProvider,
+            IReadOnlyEngineTime engineTime,
             IAgentTypesProvider agentTypesProvider,
             IRegistry registry,
             IGameLayerMasksProvider layerMasksProvider,
@@ -52,6 +57,7 @@ namespace GameCore
         )
         {
             this.prefabsProvider = prefabsProvider;
+            this.engineTime = engineTime;
             this.agentTypesProvider = agentTypesProvider;
             this.registry = registry;
             this.layerMasksProvider = layerMasksProvider;
@@ -91,7 +97,17 @@ namespace GameCore
 
         public void OnUpdate()
         {
-            if (attackEnabled && Time.time - attackLastTime >= 1 / agentConfig.castRate)
+            if (castRateResetTime > 0)
+            {
+                if (engineTime.IsAfterOrSame(castRateResetTime))
+                {
+                    castRateResetTime = -1;
+
+                    SetCastRateMultiplier(1f);
+                }
+            }
+
+            if (attackEnabled && Time.time - attackLastTime >= 1 / (agentConfig.castRate * castRateMultiplier))
             {
                 attackLastTime = Time.time;
 
@@ -153,6 +169,17 @@ namespace GameCore
         public void SetAttackTarget(Agent agent)
         {
             attackTargetAgent = agent;
+        }
+
+        void SetCastRateMultiplier(float val)
+        {
+            this.castRateMultiplier = val;
+        }
+
+        public void SetCastRateMultiplier(float val, float duration)
+        {
+            this.castRateMultiplier = Mathf.Min(val, 5f);
+            this.castRateResetTime = engineTime.Time + duration;
         }
 
         void Attack(Vector3 targetPos)
