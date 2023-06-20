@@ -156,7 +156,8 @@ namespace GameCore
                     if (damageEffect is AgentDamageEffects.MovementSpeedChangeEffect damageEffect_movementSpeed)
                     {
                         agentMovement.SetMovementSpeed(agentMovement.MovementSpeed * damageEffect_movementSpeed.speedMultiplier, damageEffect_movementSpeed.duration);
-                        agentCombat.SetCastRateMultiplier(damageEffect_movementSpeed.speedMultiplier * 2f, damageEffect_movementSpeed.duration);
+                        // ! restore
+                        // agentCombat.SetCastRateMultiplier(damageEffect_movementSpeed.speedMultiplier * 2f, damageEffect_movementSpeed.duration);
                     }
                     else if (damageEffect is AgentDamageEffects.EnemySpawnEffect damageEffect_enemySpawn)
                     {

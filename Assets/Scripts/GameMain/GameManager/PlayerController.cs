@@ -17,7 +17,7 @@ namespace GameMain
         private CameraFollow cameraFollow;
         private ConsolePromptUI consolePromptUI;
         private GameCore.IAgentMovement agentMovement;
-        private GameCore.IAgentAttacking agentAttacking;
+        private GameCore.IAgentCombat agentCombat;
 
         private Dictionary<KeyCode, AgentTypeName> damageModes = new Dictionary<KeyCode, AgentTypeName>(){
             [KeyCode.Alpha1] = AgentTypeName.Neutral,
@@ -51,12 +51,12 @@ namespace GameMain
 
         public void SetPlayerAgent(
             GameCore.IAgentMovement agentMovement,
-            GameCore.IAgentAttacking agentAttacking,
+            GameCore.IAgentCombat agentAttacking,
             GameCore.IAgentHealth agentHealth
         )
         {
             this.agentMovement = agentMovement;
-            this.agentAttacking = agentAttacking;
+            this.agentCombat = agentAttacking;
         }
 
         public void OnUpdate()
@@ -77,39 +77,26 @@ namespace GameMain
         {
             if (Input.GetKeyUp(KeyCode.Q))
             {
-                agentAttacking.ToggleSkill();
+                agentCombat.ToggleSkill();
             }
 
-            if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetMouseButtonUp(0))
-            {
-                agentAttacking.DisableAttack();
-            }
+            HandleSkillActivation();
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) == false)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    agentAttacking.EnableAttack();
-                }
-
                 if (Input.GetMouseButton(0))
                 {
-                    Vector3? pos = mouseHover.GroundHitFound ? (Vector3?)mouseHover.GroundHitPoint : null;
-                    agentAttacking.SetAttackTarget(pos);
+                    if (!mouseHover.AgentHitFound && mouseHover.GroundHitPoint != null)
+                    {
+                        agentMovement.SetDestination(mouseHover.GroundHitPoint.value);
+                    }
                 }
-            }
-            else if (Input.GetMouseButton(0))
-            {
-                if (!mouseHover.AgentHitFound && mouseHover.GroundHitFound)
+                else if (Input.GetMouseButtonDown(1))
                 {
-                    agentMovement.SetDestination(mouseHover.GroundHitPoint);
-                }
-            }
-            else if (Input.GetMouseButtonDown(1))
-            {
-                if (mouseHover.GroundHitFound)
-                {
-                    StartCoroutine(agentMovement.ForceUpdatePosition(mouseHover.GroundHitPoint, cameraFollow));
+                    if (mouseHover.GroundHitPoint != null)
+                    {
+                        StartCoroutine(agentMovement.ForceUpdatePosition(mouseHover.GroundHitPoint.value, cameraFollow));
+                    }
                 }
             }
 
@@ -117,10 +104,68 @@ namespace GameMain
             {
                 if (Input.GetKeyUp(item.Key))
                 {
-                    agentAttacking.SetDamageMode(agentTypesProvider.AgentTypes[item.Value]);
+                    agentCombat.SetDamageMode(agentTypesProvider.AgentTypes[item.Value]);
                     break;
                 }
             }
+        }
+
+        void HandleSkillActivation()
+        {
+            if (agentCombat.SkillActivation is GameCore.RepeatingSkillActivation skillActivation_repeating)
+            {
+                if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetMouseButtonUp(0))
+                {
+                    skillActivation_repeating.DisableAttack();
+                }
+
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        skillActivation_repeating.EnableAttack();
+                    }
+
+                    if (Input.GetMouseButton(0))
+                    {
+                        Vector3? pos = mouseHover.GroundHitPoint != null ? mouseHover.GroundHitPoint.value : null;
+                        skillActivation_repeating.SetAttackTarget(pos);
+                    }
+                }
+            }
+            else if (agentCombat.SkillActivation is GameCore.ChargingSkillActivation skillActivation_charging)
+            {
+                if (Input.GetKeyUp(KeyCode.LeftShift))
+                {
+                    skillActivation_charging.Cancel();
+                }
+
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        skillActivation_charging.Begin();
+                    }
+                    else if (Input.GetMouseButtonUp(0))
+                    {
+                        if (mouseHover.GroundHitPoint == null)
+                            skillActivation_charging.Cancel();
+                        else
+                            skillActivation_charging.Release(mouseHover.GroundHitPoint.value);
+                    }
+
+                    // if (Input.GetMouseButton(0))
+                    // {
+                    //     Vector3? pos = mouseHover.GroundHitPoint != null ? (Vector3?)mouseHover.GroundHitPoint.value : null;
+                    //     skillActivation_charging.SetAttackTarget(pos);
+                    // }
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"unhandled");
+            }
+
         }
     }
 }

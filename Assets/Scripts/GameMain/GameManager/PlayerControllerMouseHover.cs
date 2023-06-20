@@ -7,8 +7,8 @@ using GameCore;
 
 public interface IGroundHitProvider
 {
-    bool GroundHitFound { get; }
-    Vector3 GroundHitPoint { get; }
+    // bool GroundHitFound { get; }
+    Opt<Vector3> GroundHitPoint { get; }
 }
 
 public interface IAgentMouseEvents
@@ -16,6 +16,28 @@ public interface IAgentMouseEvents
     event System.Action<Agent> agentMouseEntered;
     event System.Action<Agent> agentMouseLeft;
 }
+
+public class Opt<T>
+{
+    public T value;
+
+    public Opt()
+    {
+        this.value = default(T);
+    }
+
+    public Opt<T> Updated(T val)
+    {
+        this.value = val;
+
+        return this;
+    }
+}
+
+// static class None : Opt
+// {
+
+// }
 
 public class PlayerControllerMouseHover : IGroundHitProvider, IAgentMouseEvents
 {
@@ -25,8 +47,10 @@ public class PlayerControllerMouseHover : IGroundHitProvider, IAgentMouseEvents
 
     // --- ground
 
-    private bool groundHitFound;    public bool GroundHitFound => groundHitFound;
-    private Vector3 groundHitPoint; public Vector3 GroundHitPoint => groundHitPoint;
+    // private bool groundHitFound;    public bool GroundHitFound => groundHitFound;
+    // private Vector3 groundHitPoint; public Vector3 GroundHitPoint => groundHitPoint;
+    static  Opt<Vector3> _groundHitPoint = new Opt<Vector3>();
+    private Opt<Vector3> groundHitPoint = null; public Opt<Vector3> GroundHitPoint => groundHitPoint;
 
     // --- agent
 
@@ -77,12 +101,13 @@ public class PlayerControllerMouseHover : IGroundHitProvider, IAgentMouseEvents
     {
         if (Physics.Raycast(camToMouseRay, out var groundHitInfo, 100, gameLayerMasksProvider.GroundLayerMask))
         {
-            groundHitFound = true;
-            groundHitPoint = groundHitInfo.point;
+            // groundHitFound = true;
+            groundHitPoint = _groundHitPoint.Updated(groundHitInfo.point);
         }
         else
         {
-            groundHitFound = false;
+            // groundHitFound = false;
+            groundHitPoint = null;
         }
 
         if (Physics.Raycast(camToMouseRay, out var agentHitInfo, 100, gameLayerMasksProvider.AgentLayerMask))

@@ -48,7 +48,7 @@ namespace GameCore.AgentAI.States
 
         public override void Exit()
         {
-            agent.AgentCombat.DisableAttack();
+            agent.AgentCombat.SkillActivation.Cancel();
 
             combatSM.Exit();
         }
@@ -72,8 +72,16 @@ namespace GameCore.AgentAI.States
             // }
 
             agent.AgentCombat.SetActiveSkill(skill);
-            agent.AgentCombat.SetAttackTarget(enemyAgent);
-            agent.AgentCombat.EnableAttack();
+
+            if (agent.AgentCombat.SkillActivation is RepeatingSkillActivation skill_repeating)
+            {
+                skill_repeating.SetAttackTarget(enemyAgent);
+                skill_repeating.EnableAttack();
+            }
+            else
+            {
+                Debug.LogWarning($"Unhandled AgentCombat.SkillActivation type: {agent.AgentCombat.SkillActivation.GetType()}");
+            }
 
             // combatSM.SetState(new CombatStates.Engage(agent, enemyAgent));
         }
