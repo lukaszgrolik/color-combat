@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameCore
+namespace EngineTime
 {
     public interface IReadOnlyEngineTimeCurrentTime
     {
@@ -20,8 +20,11 @@ namespace GameCore
         bool IsBeforeOrSame(float val);
         bool IsAfter(float val);
         bool IsAfterOrSame(float val);
+        float Added(float val);
         void AddListener(float time, System.Action listener);
+        void Wait(float duration, System.Action listener);
         void RemoveListener(float time, System.Action listener);
+        void RemoveAllListeners(System.Action listener);
     }
 
     public interface IEngineTimeScale : IReadOnlyEngineTime
@@ -37,7 +40,7 @@ namespace GameCore
 
     public class EngineTime : IEngineTime
     {
-        private float time;
+        protected float time;
         public float Time => time;
 
         private float deltaTime = 0f;
@@ -46,18 +49,18 @@ namespace GameCore
         private float timeScale = 1f;
         public float TimeScale => timeScale;
 
-        private EngineTimeListenersData listenersData;
+        private ListenersData listenersData;
 
         public EngineTime(
             float time = 0,
             float deltaTime = 0,
-            EngineTimeListenersData listenersData = null
+            ListenersData listenersData = null
         )
         {
             this.time = time;
             this.deltaTime = deltaTime;
 
-            this.listenersData = listenersData ?? new EngineTimeListenersData();
+            this.listenersData = listenersData ?? new ListenersData();
             this.listenersData.SetEngineTime(this);
         }
 
@@ -71,11 +74,22 @@ namespace GameCore
             listenersData.InvokeListeners();
         }
 
-        public void AddDeltaTime(float val)
+        // public void AddDeltaTime(float val, bool invokeListeners = true)
+        public void AddDeltaTime(float dt)
         {
-            deltaTime = val;
-            time += val;
+            deltaTime = dt;
+            time += dt;
 
+            // if (invokeListeners) listenersData.InvokeListeners();
+            listenersData.InvokeListeners();
+        }
+
+        public void AddDeltaTime(float dt, float _time)
+        {
+            deltaTime = dt;
+            time = _time;
+
+            // if (invokeListeners) listenersData.InvokeListeners();
             listenersData.InvokeListeners();
         }
 
@@ -91,7 +105,16 @@ namespace GameCore
         public bool IsAfter(float val) { return time > val; }
         public bool IsAfterOrSame(float val) { return time >= val; }
 
+        public float Added(float val) { return time + val; }
+
         public void AddListener(float time, System.Action listener) => listenersData.AddListener(time, listener);
+        public void Wait(float duration, System.Action listener) => listenersData.AddListener(time + duration, listener);
         public void RemoveListener(float time, System.Action listener) => listenersData.RemoveListener(time, listener);
+        public void RemoveAllListeners(System.Action listener) => listenersData.RemoveAllListeners(listener);
+
+        protected void InvokeListeners()
+        {
+            listenersData.InvokeListeners();
+        }
     }
 }

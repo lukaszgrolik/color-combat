@@ -7,31 +7,32 @@ namespace GameCore
 {
     public class ProjectileSpawn
     {
-        private IPrefabsProvider prefabsProvider;
-        private IRegistry registry;
-        private IGameLayerMasksProvider layerMasksProvider;
+        private readonly IPrefabsProvider prefabsProvider;
+        private readonly IRegistry registry;
+        private readonly IGameLayerMasksProvider layerMasksProvider;
+        private readonly MonoBehaviour agentMB;
+        private readonly AgentParty agentParty;
+
         private GameDataDef.SkillSpawnMode_Shoot shootSkill;
-        private MonoBehaviour agentMB;
-        private AgentParty agentParty;
         private AgentType damageMode;
 
         public ProjectileSpawn(
             IPrefabsProvider prefabsProvider,
             IRegistry registry,
             IGameLayerMasksProvider layerMasksProvider,
-            GameDataDef.SkillSpawnMode_Shoot shootSkill,
+            // GameDataDef.SkillSpawnMode_Shoot shootSkill,
             MonoBehaviour agentMB,
-            AgentParty agentParty,
-            AgentType damageMode
+            AgentParty agentParty
+            // AgentType damageMode
         )
         {
             this.prefabsProvider = prefabsProvider;
             this.registry = registry;
             this.layerMasksProvider = layerMasksProvider;
-            this.shootSkill = shootSkill;
+            // this.shootSkill = shootSkill;
             this.agentMB = agentMB;
             this.agentParty = agentParty;
-            this.damageMode = damageMode;
+            // this.damageMode = damageMode;
         }
 
         public void Spawn(float angleToTarget)
@@ -60,7 +61,6 @@ namespace GameCore
         public void SetShootSkill(GameDataDef.SkillSpawnMode_Shoot shootSkill)
         {
             this.shootSkill = shootSkill;
-
         }
 
         public void SetDamageMode(AgentType damageMode)

@@ -7,7 +7,7 @@ namespace GameCore.AgentAI.States.PatrolStates
     class Waiting : SM.State, IAgentAITickableState
     {
         private Agent agent;
-        private EngineTime engineTime;
+        private EngineTime.IReadOnlyEngineTime engineTime;
 
         private float waitingTimeMin = 1f;
         private float waitingTimeMax = 3f;

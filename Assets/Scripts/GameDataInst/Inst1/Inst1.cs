@@ -50,6 +50,35 @@ namespace GameDataInst.Inst1
                 )
             )
         );
+        static public Skill fireball_charge = new Skill(
+            name: "Fireball Charge",
+            mode: new SkillMode_Spawn(
+                mode: new SkillSpawnMode_Shoot(
+                    originPoint: SkillSpawnOriginPoint.Caster,
+                    count: 1
+                )
+            ),
+            targetAim: new SkillSpawnTargetAim_Manual(),
+            skillActivation: new SkillActivation_Charging(
+                // ! mode - modify attributes
+                // ! mode - skill types
+            ),
+            instantiation: new SkillSpawnInstantiation()
+        );
+        static public Skill arrows_multiShootAutoAim = new Skill(
+            name: "Arrows multi-shoot auto-aim",
+            mode: new SkillMode_Spawn(
+                mode: new SkillSpawnMode_Shoot(
+                    originPoint: SkillSpawnOriginPoint.Caster
+                )
+            ),
+            targetAim: new SkillSpawnTargetAim_AutoLock(),
+            skillActivation: new SkillActivation_Single(),
+            instantiation: new SkillSpawnInstantiation(
+                count: 10,
+                maxTime: .5f
+            )
+        );
 
         // meteor
         // hydra
@@ -175,6 +204,8 @@ namespace GameDataInst.Inst1
                             Skills.fireball,
                             Skills.fireball_wave,
                             Skills.fireball_nova,
+                            Skills.fireball_charge,
+                            Skills.arrows_multiShootAutoAim,
                         },
                         castRate: 5f
                     )

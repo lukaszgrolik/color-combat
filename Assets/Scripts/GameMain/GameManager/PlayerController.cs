@@ -57,6 +57,12 @@ namespace GameMain
         {
             this.agentMovement = agentMovement;
             this.agentCombat = agentAttacking;
+
+            agentCombat.skillActivated += OnSkillActivated;
+            void OnSkillActivated(GameDataDef.Skill skill)
+            {
+                Debug.Log($"skill activated: {skill.name}");
+            }
         }
 
         public void OnUpdate()
@@ -75,10 +81,8 @@ namespace GameMain
 
         void HandleInput()
         {
-            if (Input.GetKeyUp(KeyCode.Q))
-            {
-                agentCombat.ToggleSkill();
-            }
+            if (Input.GetKeyUp(KeyCode.Q)) agentCombat.SetPreviousSkill();
+            if (Input.GetKeyUp(KeyCode.W)) agentCombat.SetNextSkill();
 
             HandleSkillActivation();
 
@@ -112,7 +116,14 @@ namespace GameMain
 
         void HandleSkillActivation()
         {
-            if (agentCombat.SkillActivation is GameCore.RepeatingSkillActivation skillActivation_repeating)
+            if (agentCombat.SkillActivation is GameCore.SingleSkillActivation skillActivation_single)
+            {
+                if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0))
+                {
+                    skillActivation_single.Release(mouseHover.GroundHitPoint.value);
+                }
+            }
+            else if (agentCombat.SkillActivation is GameCore.RepeatingSkillActivation skillActivation_repeating)
             {
                 if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetMouseButtonUp(0))
                 {

@@ -9,19 +9,23 @@ namespace GameCore
         private float beginTime = -Mathf.Infinity;
 
         public ContinuousSkillActivation(
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             GameDataDef.Agent agentConfig,
-            SkillInvoker skillInvoker
+            GameDataDef.Skill skillConfig,
+            SkillInvoker skillInvoker,
+            AgentDetection agentDetection
         ) : base(
             engineTime,
             agentConfig,
-            skillInvoker
+            skillConfig,
+            skillInvoker,
+            agentDetection
         )
         {
 
         }
 
-        public override void OnUpdate()
+        protected override void HandleUpdate()
         {
 
         }

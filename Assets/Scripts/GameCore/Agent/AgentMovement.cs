@@ -21,7 +21,7 @@ namespace GameCore
 
     public class AgentMovement : IAgentMovement
     {
-        private readonly IReadOnlyEngineTime engineTime;
+        private readonly EngineTime.IReadOnlyEngineTime engineTime;
         private IPrefabsProvider prefabsProvider;
         private IRegistry registry;
         private NavMeshAgent navMeshAgent;
@@ -37,7 +37,7 @@ namespace GameCore
         public event System.Action arrived;
 
         public AgentMovement(
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             IPrefabsProvider prefabsProvider,
             IRegistry registry,
             NavMeshAgent navMeshAgent,

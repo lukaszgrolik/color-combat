@@ -55,7 +55,7 @@ namespace GameCore
 
                 if (hostile)
                 {
-                    aliveEnemies.Remove(agent);
+                    aliveEnemies.Remove(otherAgent);
                     detectedEnemiesChanged?.Invoke();
                 }
 

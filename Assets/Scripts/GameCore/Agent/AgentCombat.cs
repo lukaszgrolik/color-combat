@@ -8,22 +8,27 @@ namespace GameCore
     public class SkillInvoker
     {
         private readonly MonoBehaviour agentMB;
+        private readonly IEntityProvider entityProvider; public IEntityProvider EntityProvider => entityProvider;
         private readonly AgentMovement agentMovement;
         private readonly ProjectileSpawn projectileSpawn;
 
         public SkillInvoker(
             MonoBehaviour agentMB,
+            IEntityProvider entityProvider,
             AgentMovement agentMovement,
             ProjectileSpawn projectileSpawn
         )
         {
             this.agentMB = agentMB;
+            this.entityProvider = entityProvider;
             this.agentMovement = agentMovement;
             this.projectileSpawn = projectileSpawn;
         }
 
         public void InvokeSkill(Vector3 targetPos)
         {
+            // beforeSkillInvoked?.Invoke();
+
             agentMovement.Cancel();
 
             var originPos = agentMB.transform.position;
@@ -34,18 +39,23 @@ namespace GameCore
             agentMB.transform.rotation = Quaternion.Euler(0, angle, 0);
 
             projectileSpawn.Spawn(angle);
+
+            // afterSkillInvoked?.Invoke();
         }
     }
 
-    public interface IAgentCombat
+    public interface IReadOnlyAgentCombat
     {
         GameDataDef.Skill ActiveSkill { get; }
         SkillActivation SkillActivation { get; }
+    }
+
+    public interface IAgentCombat : IReadOnlyAgentCombat
+    {
         void SetDamageMode(AgentType agentType);
-        // void EnableAttack();
-        // void DisableAttack();
-        // void SetAttackTarget(Vector3? point);
-        void ToggleSkill();
+        void SetPreviousSkill();
+        void SetNextSkill();
+        event System.Action<GameDataDef.Skill> skillActivated;
     }
 
     public class AgentCombat : IAgentCombat
@@ -56,9 +66,9 @@ namespace GameCore
             [typeof(GameDataDef.SkillActivation_Continuous)] = typeof(ContinuousSkillActivation),
             [typeof(GameDataDef.SkillActivation_Charging)] = typeof(ChargingSkillActivation),
         };
-
+        private readonly IEntityProvider entityProvider;
         private readonly IPrefabsProvider prefabsProvider;
-        private readonly IReadOnlyEngineTime engineTime;
+        private readonly EngineTime.IReadOnlyEngineTime engineTime;
         private readonly IAgentTypesProvider agentTypesProvider;
         private readonly IRegistry registry;
         private readonly IGameLayerMasksProvider layerMasksProvider;
@@ -67,6 +77,7 @@ namespace GameCore
         private readonly GameDataDef.Agent agentConfig;
         private readonly AgentParty agentParty;
         private readonly AgentMovement agentMovement;
+        private readonly AgentDetection agentDetection;
 
         private AgentType damageMode;
 
@@ -79,9 +90,12 @@ namespace GameCore
         private SkillInvoker skillInvoker;
         private SkillActivation skillActivation; public SkillActivation SkillActivation => skillActivation;
 
+        public event System.Action<GameDataDef.Skill> skillActivated;
+
         public AgentCombat(
+            IEntityProvider entityProvider,
             IPrefabsProvider prefabsProvider,
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             IAgentTypesProvider agentTypesProvider,
             IRegistry registry,
             IGameLayerMasksProvider layerMasksProvider,
@@ -89,9 +103,11 @@ namespace GameCore
             NavMeshAgent navMeshAgent,
             GameDataDef.Agent agentConfig,
             AgentParty agentParty,
-            AgentMovement agentMovement
+            AgentMovement agentMovement,
+            AgentDetection agentDetection
         )
         {
+            this.entityProvider = entityProvider;
             this.prefabsProvider = prefabsProvider;
             this.engineTime = engineTime;
             this.agentTypesProvider = agentTypesProvider;
@@ -102,8 +118,7 @@ namespace GameCore
             this.agentConfig = agentConfig;
             this.agentParty = agentParty;
             this.agentMovement = agentMovement;
-
-            this.damageMode = agentTypesProvider.AgentTypesList[0];
+            this.agentDetection = agentDetection;
 
             foreach (var skill in agentConfig.skills)
             {
@@ -118,24 +133,26 @@ namespace GameCore
                 }
             }
 
-            SetActiveSkill(this.skills[0]);
-
             this.projectileSpawn = new ProjectileSpawn(
                 prefabsProvider,
                 registry,
                 layerMasksProvider,
-                shootSkill: (activeSkill.mode as GameDataDef.SkillMode_Spawn).mode as GameDataDef.SkillSpawnMode_Shoot,
+                // shootSkill: (activeSkill.mode as GameDataDef.SkillMode_Spawn).mode as GameDataDef.SkillSpawnMode_Shoot,
                 agentMB,
-                agentParty,
-                damageMode
+                agentParty
+                // damageMode
             );
 
             this.skillInvoker = new SkillInvoker(
                 agentMB: agentMB,
+                entityProvider: entityProvider,
                 agentMovement: agentMovement,
                 projectileSpawn: projectileSpawn
+
             );
 
+            SetActiveSkill(this.skills[0]);
+            SetDamageMode(agentTypesProvider.AgentTypesList[0]);
         }
 
         public void OnUpdate()
@@ -149,19 +166,29 @@ namespace GameCore
 
             this.activeSkill = skill;
 
+            this.skillActivation = skillActivationTypeMapper.Instantiate<SkillActivation>(skill.skillActivation,
+                engineTime,
+                agentConfig,
+                activeSkill,
+                skillInvoker,
+                agentDetection
+            );
+
             if (skill.mode is GameDataDef.SkillMode_Spawn skillMode_spawn)
             {
                 if (skillMode_spawn.mode is GameDataDef.SkillSpawnMode_Shoot skillSpawnMode_shoot)
                 {
                     projectileSpawn.SetShootSkill(skillSpawnMode_shoot);
+                    // projectileSpawn.SetSpeed();
+                    // projectileSpawn.SetDamage();
+
+                    // skillActivation.skillInvoked += OnSkillInvoked;
+                    // void OnSkillInvoked()
+                    // {
+
+                    // }
                 }
             }
-
-            this.skillActivation = skillActivationTypeMapper.Instantiate<SkillActivation>(skill.skillActivation,
-                engineTime,
-                agentConfig,
-                skillInvoker
-            );
 
             // if (skill.skillActivation is GameDataDef.SkillActivation_Single skillActivation_single)
             // {
@@ -172,6 +199,8 @@ namespace GameCore
             //     );
 
             // }
+
+            skillActivated?.Invoke(activeSkill);
         }
 
         public void SetDamageMode(AgentType agentType)
@@ -180,7 +209,12 @@ namespace GameCore
             projectileSpawn.SetDamageMode(agentType);
         }
 
-        public void ToggleSkill()
+        public void SetPreviousSkill()
+        {
+            SetActiveSkill(skills.PreviousOrLast(activeSkill));
+        }
+
+        public void SetNextSkill()
         {
             SetActiveSkill(skills.NextOrFirst(activeSkill));
         }

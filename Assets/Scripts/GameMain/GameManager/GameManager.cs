@@ -53,7 +53,7 @@ namespace GameMain
         [SerializeField] private GameObject movementTargetPrefab; public GameObject MovementTargetPrefab => movementTargetPrefab;
         [SerializeField] private GameObject projectilePrefab;     public GameObject ProjectilePrefab => projectilePrefab;
 
-        public readonly EngineTime engineTime = new EngineTime();
+        public readonly EngineTime.EngineTime engineTime = new EngineTime.EngineTime();
 
         // [SerializeField] private Agent controlledAgent;
 

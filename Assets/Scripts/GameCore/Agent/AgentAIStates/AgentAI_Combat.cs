@@ -24,7 +24,7 @@ namespace GameCore.AgentAI.States
     class BetterCombat : SM.State, ITemp_AgentAICombat
     {
         private readonly Agent agent;
-        private readonly EngineTime engineTime;
+        private readonly EngineTime.IReadOnlyEngineTime engineTime;
 
         private SM.StateMachine combatSM = new SM.StateMachine();
 

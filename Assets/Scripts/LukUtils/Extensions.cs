@@ -18,6 +18,15 @@ public static class ListExtensions
         return list[nextIndex];
     }
 
+    public static T PreviousOrLast<T>(this List<T> list, T currentItem)
+    {
+        var index = list.IndexOf(currentItem);
+        if (index == -1) return default(T);
+
+        var prevIndex = index == 0 ? list.Count - 1 : index - 1;
+
+        return list[prevIndex];
+    }
 }
 
 public static class Vector3Extensions

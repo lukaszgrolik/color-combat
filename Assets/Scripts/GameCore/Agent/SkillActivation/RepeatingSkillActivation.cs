@@ -15,19 +15,23 @@ namespace GameCore
         private float castRateResetTime = -1;
 
         public RepeatingSkillActivation(
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             GameDataDef.Agent agentConfig,
-            SkillInvoker skillInvoker
+            GameDataDef.Skill skillConfig,
+            SkillInvoker skillInvoker,
+            AgentDetection agentDetection
         ) : base(
             engineTime,
             agentConfig,
-            skillInvoker
+            skillConfig,
+            skillInvoker,
+            agentDetection
         )
         {
 
         }
 
-        public override void OnUpdate()
+        protected override void HandleUpdate()
         {
             if (castRateResetTime > 0)
             {
@@ -47,7 +51,7 @@ namespace GameCore
                 {
                     var pos = attackTargetAgent != null ? attackTargetAgent.transform.position : (Vector3)attackTargetPos;
 
-                    skillInvoker.InvokeSkill(pos);
+                    InvokeSkill(pos);
                 }
             }
         }

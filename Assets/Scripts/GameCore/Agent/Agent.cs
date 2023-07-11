@@ -19,7 +19,7 @@ namespace GameCore
         private GameObject projectilePrefab;
         private IRegistry registry;
         private IAgentTypesProvider agentTypesProvider;
-        private EngineTime engineTime;                  public EngineTime EngineTime => engineTime;
+        private EngineTime.IReadOnlyEngineTime engineTime; public EngineTime.IReadOnlyEngineTime EngineTime => engineTime;
 
         [SerializeField] private Transform projectileSpawnPoint;
 
@@ -46,7 +46,7 @@ namespace GameCore
             IRegistry registry,
             IGameLayerMasksProvider layerMasksProvider,
             IAgentTypesProvider agentTypesProvider,
-            EngineTime engineTime
+            EngineTime.IReadOnlyEngineTime engineTime
         )
         {
             this.agentConfig = agentConfig;
@@ -76,6 +76,7 @@ namespace GameCore
             );
 
             this.agentCombat = new AgentCombat(
+                entityProvider: entityProvider,
                 prefabsProvider,
                 engineTime,
                 agentTypesProvider,
@@ -85,7 +86,8 @@ namespace GameCore
                 navMeshAgent: navMeshAgent,
                 agentConfig: agentData,
                 agentParty,
-                agentMovement: this.agentMovement
+                agentMovement: this.agentMovement,
+                agentDetection: this.agentDetection
             );
 
             this.agentDamage = new AgentDamage(

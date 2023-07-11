@@ -9,19 +9,23 @@ namespace GameCore
         private float beginTime = -Mathf.Infinity;
 
         public ChargingSkillActivation(
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             GameDataDef.Agent agentConfig,
-            SkillInvoker skillInvoker
+            GameDataDef.Skill skillConfig,
+            SkillInvoker skillInvoker,
+            AgentDetection agentDetection
         ) : base(
             engineTime,
             agentConfig,
-            skillInvoker
+            skillConfig,
+            skillInvoker,
+            agentDetection
         )
         {
 
         }
 
-        public override void OnUpdate()
+        protected override void HandleUpdate()
         {
 
         }
@@ -43,7 +47,8 @@ namespace GameCore
             // ! skill power dependent on duration - e.g. projectile faster, bigger, more damage
             // ! various skills per duration - 0s = fire bolt, .5s = fire ball, 1s = fire nova, 1.5s = meteor
 
-            skillInvoker.InvokeSkill(pos);
+            InvokeSkill(pos);
+            Debug.Log($"released after: {duration.RoundDecimal(2)}s");
         }
     }
 }

@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameCore
+namespace EngineTime
 {
-    public class EngineTimeListenersData
+    public class ListenersData
     {
         private IReadOnlyEngineTimeCurrentTime engineTime;
 
         private readonly SortedSet<float> listenerTimes = new SortedSet<float>(); public SortedSet<float> ListenerTimes => listenerTimes;
         private readonly ListDictionary<float, System.Action> listeners = new ListDictionary<float, System.Action>(); public IReadOnlyListDictionary<float, System.Action> Listeners => listeners;
+        private readonly ListDictionary<System.Action, float> timesPerListener = new ListDictionary<System.Action, float>();
 
-        // public EngineTimeListenersData(
+        // public ListenersData(
         //     IReadOnlyEngineTimeCurrentTime engineTime
         // )
         // {
@@ -28,16 +29,34 @@ namespace GameCore
         {
             listenerTimes.Add(time);
             listeners.AddListItem(time, listener);
+            timesPerListener.AddListItem(listener, time);
         }
 
-        // @todo test
         public void RemoveListener(float time, System.Action listener)
         {
             listeners.RemoveListItem(time, listener);
+            timesPerListener.RemoveListItem(listener, time);
 
-            if (listeners[time].Count == 0)
+            if (listeners.IsEmpty(time))
             {
                 listenerTimes.Remove(time);
+            }
+        }
+
+        // ! @todo UT
+        // @todo what if listeners and timesPerListener contain same listeners for the same time? memory leak as only the first occurrence is deleted?
+        public void RemoveAllListeners(System.Action listener)
+        {
+            timesPerListener.TryGetValue(listener, out var times);
+
+            if (times != null && times.Count > 0)
+            {
+                for (int i = 0; i < times.Count; i++)
+                {
+                    var time = times[i];
+
+                    RemoveListener(time, listener);
+                }
             }
         }
 
@@ -49,6 +68,10 @@ namespace GameCore
             // var i = 0;
             var toRemove = new List<float>();
             // for (int i = 0; i < listenerTimes.Count; i++)
+
+            // var listenerTimesToInvoke = new SortedSet<float>(listenerTimes);
+            var listenersToInvoke = new List<System.Action>();
+
             foreach (var listenerTime in listenerTimes)
             {
                 // var listenerTime = listenerTimes.[i];
@@ -58,11 +81,7 @@ namespace GameCore
                     // lastIndex = i;
 
                     var listenersSlice = listeners[listenerTime];
-
-                    for (int j = 0; j < listenersSlice.Count; j++)
-                    {
-                        listenersSlice[j]();
-                    }
+                    listenersToInvoke.AddRange(listenersSlice);
 
                     listeners.Remove(listenerTime);
                     toRemove.Add(listenerTime);
@@ -82,6 +101,11 @@ namespace GameCore
                 {
                     listenerTimes.Remove(toRemove[j]);
                 }
+            }
+
+            for (int i = 0; i < listenersToInvoke.Count; i++)
+            {
+                listenersToInvoke[i]();
             }
         }
     }

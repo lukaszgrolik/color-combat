@@ -7,20 +7,29 @@ namespace GameCore
     public sealed class SingleSkillActivation : SkillActivation
     {
         public SingleSkillActivation(
-            IReadOnlyEngineTime engineTime,
+            EngineTime.IReadOnlyEngineTime engineTime,
             GameDataDef.Agent agentConfig,
-            SkillInvoker skillInvoker
+            GameDataDef.Skill skillConfig,
+            SkillInvoker skillInvoker,
+            AgentDetection agentDetection
         ) : base(
             engineTime,
             agentConfig,
-            skillInvoker
+            skillConfig,
+            skillInvoker,
+            agentDetection
         )
         {
         }
 
-        public override void OnUpdate()
+        protected override void HandleUpdate()
         {
 
+        }
+
+        public void Release(Vector3 pos)
+        {
+            InvokeSkill(pos);
         }
 
         public override void Cancel()
